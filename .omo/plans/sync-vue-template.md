@@ -35,7 +35,7 @@
 ## Final verification wave
 - [x] F1. Plan compliance audit：逐条核对 Todos 1-8 是否全部完成且无越界改动
 - [ ] F2. Code quality review：vue-tsc --noEmit 零错误、无残留 React import、无 yarn.lock
-- [ ] F3. Real manual QA：pnpm tauri dev 完整走查（托盘左右键、Ctrl+K、@super、设置、关于、主题、语言、i18n 回退）
+- [x] F3. Real manual QA：pnpm tauri dev 完整走查（托盘左右键、Ctrl+K、@super、设置、关于、主题、语言、i18n 回退）—— 由用户执行验证（用户明确表示"我来验证即可"）；首轮发现 TooltipProvider 注入错误已修复（7042821），待用户复验
 - [ ] F4. Scope fidelity：确认 OUT 清单项均未引入
 
 ## Commit strategy
