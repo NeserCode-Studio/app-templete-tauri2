@@ -101,15 +101,6 @@ if (currentLabel === "tray") {
   })()
 }
 
-/* 主题 class 挂到 html 上 */
-watch(
-  colorSchemeClass,
-  (cls) => {
-    document.documentElement.classList.toggle("dark", cls === "dark")
-  },
-  { immediate: true }
-)
-
 /* 托盘路由守卫：主窗口不允许进入 /tray */
 watch(
   () => route.path,
