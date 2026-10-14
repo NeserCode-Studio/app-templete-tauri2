@@ -1,5 +1,14 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectLabel,
+  SelectItem,
+} from "@/components/ui/select"
 
 const props = defineProps<{
   items: { value: string; label: string }[]
@@ -13,9 +22,14 @@ const props = defineProps<{
 
 const emit = defineEmits<{ (e: "submit", data: FormData): void }>()
 
+const selected = defineModel<string>()
+
 function onSubmit(e: Event) {
   e.preventDefault()
-  emit("submit", new FormData(e.target as HTMLFormElement))
+  const data = new FormData(e.target as HTMLFormElement)
+  /* reka-ui Select 不走原生 form，把当前选中值注入 FormData */
+  data.set("select", selected.value ?? "")
+  emit("submit", data)
 }
 </script>
 
@@ -29,16 +43,27 @@ function onSubmit(e: Event) {
 				<span v-if="props.description" class="text-muted-foreground text-xs leading-relaxed">{{ props.description }}</span>
 			</div>
 			<div class="flex shrink-0 items-center gap-2 sm:w-[22rem] sm:justify-end">
-				<select
-					name="select"
-					:value="props.value?.value"
-					class="border-input bg-background focus-visible:ring-ring flex h-9 w-full flex-1 rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1"
-				>
-					<option v-if="props.placeholder" value="" disabled>{{ props.placeholder }}</option>
-					<option v-for="item in props.items" :key="item.value" :value="item.value">
-						{{ item.label }}
-					</option>
-				</select>
+				<Select v-model="selected" name="select">
+					<SelectTrigger class="flex-1">
+						<SelectValue
+							:placeholder="props.placeholder ?? 'Select one'"
+						/>
+					</SelectTrigger>
+					<SelectContent>
+						<SelectGroup>
+							<SelectLabel v-if="props.label">
+								{{ props.label }}
+							</SelectLabel>
+							<SelectItem
+								v-for="item in props.items"
+								:key="item.value"
+								:value="item.value"
+							>
+								{{ item.label }}
+							</SelectItem>
+						</SelectGroup>
+					</SelectContent>
+				</Select>
 				<Button type="submit" size="sm">
 					{{ props.submit ?? "Submit" }}
 				</Button>

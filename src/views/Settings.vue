@@ -136,6 +136,8 @@ const langItems = [
   { value: "en-US", label: "English(US)" },
   { value: "zh-CN", label: "简体中文" },
 ]
+const langSelection = ref(i18n.lang)
+
 function langAction(data: FormData) {
   const value = data.get("select")
   if (!value || value === i18n.lang)
@@ -275,8 +277,8 @@ function autoCompleteAction(checked: boolean) {
 						:on-item-submit="titleAction"
 					/>
 					<SettingSelectItem
+						v-model="langSelection"
 						:items="langItems"
-						:value="langItems.find((i) => i.value === i18n.lang)"
 						:label="i18n.t('Settings.items.lang.label')"
 						:placeholder="i18n.t('Settings.items.select.default.placeholder')"
 						:title="i18n.t('Settings.items.lang.title')"
