@@ -136,5 +136,6 @@ watch(
 	width: 100vw;
 	overflow: hidden;
 	background-color: var(--background);
+	transition: background-color 100ms ease-in-out;
 }
 </style>
