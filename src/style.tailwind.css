@@ -76,9 +76,19 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /* 全局颜色过渡：主题切换、悬停高亮等所有颜色变化统一平滑
+     （不含 opacity/transform，避免干扰 animate-in/out 弹层动画） */
+  *,
+  ::before,
+  ::after {
+    transition-property: color, background-color, border-color,
+      outline-color, text-decoration-color, fill, stroke;
+    transition-duration: 100ms;
+    transition-timing-function: ease-in-out;
+  }
   html,
   body {
-    @apply bg-background text-foreground transition-colors duration-100 ease-in-out;
+    @apply bg-background text-foreground;
   }
   button {
     @apply cursor-pointer;

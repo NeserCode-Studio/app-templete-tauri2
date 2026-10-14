@@ -141,6 +141,9 @@ watch(
 
 <style lang="postcss" scoped>
 .app-tray {
-	@apply h-screen w-screen overflow-hidden bg-neutral-50 dark:bg-neutral-800 transition-colors duration-100 ease-in-out;
+	height: 100vh;
+	width: 100vw;
+	overflow: hidden;
+	background-color: var(--background);
 }
 </style>

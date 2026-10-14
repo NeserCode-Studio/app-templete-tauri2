@@ -13,7 +13,8 @@ const THEME_KEY = "theme-mode";
  * - 用户手动切换后写入 localStorage，此后不再自动跟随
  */
 export const useThemeStore = defineStore("app-theme", () => {
-  const isDark = useDark({ storageKey: THEME_KEY });
+  // disableTransition: false —— 允许切换时的颜色过渡（默认会注入 transition:none 抑制闪烁）
+  const isDark = useDark({ storageKey: THEME_KEY, disableTransition: false });
   const prefersDark = usePreferredDark();
   /** 用户是否手动选择过主题（手动后不再跟随系统） */
   const manual = useLocalStorage(`${THEME_KEY}-manual`, false);
