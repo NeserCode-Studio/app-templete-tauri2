@@ -1,32 +1,146 @@
-<script lang="ts" setup>
-import Titlebar from "./components/frameworks/Titlebar.vue"
+<script setup lang="ts">
+import { computed, onMounted, onScopeDispose, ref, watch } from "vue"
+import { useRoute, useRouter } from "vue-router"
 import { Toaster } from "vue-sonner"
-import { computed } from "vue"
+import { getCurrentWindow, PhysicalPosition } from "@tauri-apps/api/window"
+import { listen } from "@tauri-apps/api/event"
 
-import { useDark } from "./composables/useDark"
+import Titlebar from "@/components/frameworks/Titlebar.vue"
+import CommandDialog from "@/components/frameworks/CommandDialog.vue"
+import SettingsDialog from "@/components/frameworks/SettingsDialog.vue"
+import AboutDialog from "@/components/frameworks/AboutDialog.vue"
 
-const { isDark } = useDark()
-const computedColorSchemeClass = computed(() =>
-	isDark.value ? "dark" : "light"
+import { useThemeStore, useDialogStore } from "@/store"
+import { WindowUtils } from "@/lib/window.utils"
+import { lifecycle } from "@/lifecycle"
+import { createLogger } from "@/lib/logger"
+
+const log = createLogger("App")
+
+const theme = useThemeStore()
+const dialogs = useDialogStore()
+const route = useRoute()
+const router = useRouter()
+
+/* 检测当前窗口 */
+const currentLabel = getCurrentWindow().label
+const isTrayWindow = computed(() => currentLabel === "tray")
+const colorSchemeClass = computed(() => (theme.theme === "dark" ? "dark" : "light"))
+
+/* 应用就绪钩子：主窗口显示并聚焦。
+   托盘窗口跳过。 */
+const $windowMain = new WindowUtils("main")
+lifecycle.register({
+  id: "window.render-focus",
+  stage: "ready",
+  once: true,
+  run: () => {
+    if (getCurrentWindow().label === "tray") return
+    return $windowMain.renderFocus()
+  },
+})
+
+/* 生命周期阶段只触发一次（Vue 下无 StrictMode 问题，但保持幂等） */
+const fired = ref(false)
+
+onMounted(() => {
+  if (fired.value) return
+  fired.value = true
+  void lifecycle.fire("mount").then(() => lifecycle.fire("ready"))
+})
+
+/* 跨窗口事件监听（主窗口） */
+let unlisteners: Array<() => void> = []
+onMounted(async () => {
+  if (currentLabel === "tray") return
+
+  const unlistenPopup = await listen<{ x: number; y: number }>(
+    "tray-popup",
+    async (event) => {
+      const trayWindow = await WindowUtils.getWindowByLabel("tray")
+      if (!trayWindow) {
+        log.warn("tray-popup: tray window not found")
+        return
+      }
+      const size = await trayWindow.outerSize()
+      const x = Math.round(event.payload.x - size.width / 2)
+      const y = Math.max(0, Math.round(event.payload.y - size.height))
+      await trayWindow.setPosition(new PhysicalPosition(x, y))
+      await trayWindow.show()
+      await trayWindow.setFocus()
+      log.info("tray menu popped", { x, y })
+    }
+  )
+
+  const unlistenNavigate = await listen<string>("navigate", (event) => {
+    const target = event.payload
+    log.info("navigate event", target)
+    if (target === "/settings") {
+      dialogs.openSettings()
+    } else if (target === "/about") {
+      dialogs.openAbout()
+    } else {
+      void router.push(target)
+    }
+  })
+
+  unlisteners = [unlistenPopup, unlistenNavigate]
+})
+onScopeDispose(() => {
+  unlisteners.forEach((fn) => fn())
+})
+
+/* 托盘窗口失焦自动隐藏 */
+if (currentLabel === "tray") {
+  void (async () => {
+    const win = getCurrentWindow()
+    const fn = await win.onFocusChanged(({ payload: focused }) => {
+      if (!focused) void win.hide()
+    })
+    onScopeDispose(() => fn())
+  })()
+}
+
+/* 主题 class 挂到 html 上 */
+watch(
+  colorSchemeClass,
+  (cls) => {
+    document.documentElement.classList.toggle("dark", cls === "dark")
+  },
+  { immediate: true }
+)
+
+/* 托盘路由守卫：主窗口不允许进入 /tray */
+watch(
+  () => route.path,
+  (path) => {
+    if (isTrayWindow.value && path !== "/tray") void router.push("/tray")
+    if (!isTrayWindow.value && path === "/tray") void router.push("/")
+  },
+  { immediate: true }
 )
 </script>
 
 <template>
-	<div id="app-main">
-		<Titlebar />
-		<Toaster :theme="computedColorSchemeClass" richColors />
-		<div>
-			<router-link to="/">Home</router-link>
-			<router-link to="/about">About</router-link>
-		</div>
-		<router-view></router-view>
+	<div v-if="isTrayWindow" class="app-tray">
+		<router-view />
 	</div>
+	<main v-else id="app-main" class="app-shell">
+		<Titlebar />
+		<CommandDialog />
+
+		<div id="container" class="app-body">
+			<router-view />
+		</div>
+
+		<SettingsDialog />
+		<AboutDialog />
+		<Toaster :theme="colorSchemeClass" richColors position="bottom-right" />
+	</main>
 </template>
 
 <style lang="postcss" scoped>
-#app-main {
-	@apply flex flex-col justify-start items-center h-screen
-	bg-slate-50 dark:bg-slate-800
-	transition-colors ease-in-out duration-200;
+.app-tray {
+	@apply h-screen w-screen overflow-hidden bg-neutral-50 dark:bg-neutral-800;
 }
 </style>
