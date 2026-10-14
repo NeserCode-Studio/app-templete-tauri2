@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-import Greet from "../components/Greet.vue"
+import { useI18nStore } from "@/store/i18n";
+const i18n = useI18nStore();
 </script>
 
 <template>
-	<div class="view-home">
-		<h1>Home Page</h1>
-		<Greet />
-	</div>
+  <div class="view transition-colors duration-100">
+    <div class="view-home">
+      <h1 class="view-title">{{ i18n.t("Home.title") }}</h1>
+    </div>
+  </div>
 </template>
-
-<style lang="postcss" scoped></style>

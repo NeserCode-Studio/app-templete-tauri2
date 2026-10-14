@@ -1,0 +1,14 @@
+{
+  "schema_version": 2,
+  "active_work_id": "sync-vue-template",
+  "works": {
+    "sync-vue-template": {
+      "work_id": "sync-vue-template",
+      "active_plan": ".omo/plans/sync-vue-template.md",
+      "plan_name": "sync-vue-template",
+      "session_ids": ["codex:sync-vue-template"],
+      "status": "active",
+      "worktree_path": null
+    }
+  }
+}

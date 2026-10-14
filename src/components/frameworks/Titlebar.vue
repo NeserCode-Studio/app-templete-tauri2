@@ -1,160 +1,123 @@
-<script lang="ts" setup>
+<script setup lang="ts">
+import { useI18nStore } from "@/store/i18n";
 import {
-	MinusIcon,
-	XMarkIcon,
-	SunIcon,
-	MoonIcon,
-	PaperClipIcon,
-} from "@heroicons/vue/20/solid"
-import { onMounted, computed } from "vue"
-import { useStorage, useThrottleFn } from "@vueuse/core"
+  Menubar,
+  MenubarMenu,
+  MenubarTrigger,
+  MenubarContent,
+  MenubarItem,
+  MenubarSeparator,
+  MenubarShortcut,
+} from "@/components/ui/menubar";
+import { useRouter } from "vue-router";
+import { useDialogStore, useThemeStore } from "@/store";
+import TitlebarTitle from "./TitlebarTitle.vue";
+import TitlebarOperations from "./TitlebarOperations.vue";
+import { Sun, Moon } from "@lucide/vue";
+import * as editorActions from "@/lib/editor.actions";
+import { WindowUtils } from "@/lib/window.utils";
 
-import { getCurrentWindow } from "@tauri-apps/api/window"
+const i18n = useI18nStore();
+const router = useRouter();
+const dialogs = useDialogStore();
+const theme = useThemeStore();
 
-import { useDark } from "../../composables/useDark"
-import { useTitleStore } from "../../store"
-
-const appWindow = getCurrentWindow()
-const titleText = computed(() => {
-	const { title } = useTitleStore()
-
-	return title
-})
-
-const isAlwaysonTop = useStorage("app-always-on-top", false)
-
-const ispinnedClass = computed(() => {
-	return isAlwaysonTop.value ? "pinned" : null
-})
-
-// Initial
-onMounted(async () => {
-	await appWindow.setAlwaysOnTop(isAlwaysonTop.value)
-})
-
-async function toggleIspinned() {
-	isAlwaysonTop.value = !isAlwaysonTop.value
-	await appWindow.setAlwaysOnTop(isAlwaysonTop.value)
+function toggleTheme() {
+  theme.setThemeMode(theme.theme === "dark" ? "light" : "dark");
 }
-const throttleToggleIspinned = useThrottleFn(() => {
-	toggleIspinned()
-}, 800)
-
-function minimize() {
-	let element = document.querySelector(".minimize.btn") as HTMLElement
-	element.classList.remove("moving")
-	appWindow.minimize()
-}
-
-async function close() {
-	await appWindow.close()
-}
-
-function addMoveClass(event: MouseEvent) {
-	let element = event.target as HTMLElement
-	element.classList.add("moving")
-}
-function removeMoveClass(event: MouseEvent) {
-	let element = event.target as HTMLElement
-	element.classList.remove("moving")
-}
-
-const { isDark, toggle: toggleDark } = useDark()
 </script>
 
 <template>
-	<div id="app-title-bar" data-tauri-drag-region>
-		<span class="title" data-tauri-drag-region>
-			<span data-tauri-drag-region>{{ titleText }} · Static</span>
-		</span>
-		<div class="buttons" data-tauri-drag-region>
-			<span
-				:class="['btn', 'pin', ispinnedClass]"
-				@mouseenter="addMoveClass"
-				@mouseleave="removeMoveClass"
-				@click="throttleToggleIspinned"
-			>
-				<PaperClipIcon class="icon" />
-			</span>
-			<span
-				class="btn darkmode"
-				@mouseenter="addMoveClass"
-				@mouseleave="removeMoveClass"
-				@click="toggleDark()"
-			>
-				<SunIcon v-show="!isDark" />
-				<MoonIcon v-show="isDark" />
-			</span>
-			<span
-				class="btn minimize"
-				@mouseenter="addMoveClass"
-				@mouseleave="removeMoveClass"
-				@click="minimize"
-			>
-				<MinusIcon />
-			</span>
-			<span
-				class="btn close danger"
-				@mouseenter="addMoveClass"
-				@mouseleave="removeMoveClass"
-				@click="close"
-			>
-				<XMarkIcon />
-			</span>
-		</div>
-	</div>
+  <div
+    class="titlebar fixed top-0 z-50 flex h-8 w-screen flex-row items-center justify-between border-b border-neutral-400 bg-white pl-2 shadow-sm dark:border-neutral-600 dark:bg-black"
+    data-tauri-drag-region
+  >
+    <Menubar
+      class="h-6 w-fit gap-1 rounded-none border-0 bg-transparent p-0 text-neutral-600 shadow-none transition-colors duration-100 ease-in-out dark:text-neutral-200"
+    >
+      <MenubarMenu>
+        <MenubarTrigger class="h-full w-fit px-2 text-sm">
+          {{ i18n.t("Titlebar.menu.turnto") }}
+        </MenubarTrigger>
+        <MenubarContent class="w-fit transition-all duration-100 ease-in-out">
+          <MenubarItem @select="() => router.push('/')">
+            {{ i18n.t("Titlebar.menu.turnto.home") }}
+          </MenubarItem>
+          <MenubarItem @select="() => dialogs.openSettings()">
+            {{ i18n.t("Titlebar.menu.turnto.settings") }}
+          </MenubarItem>
+          <MenubarSeparator />
+          <MenubarItem @select="toggleTheme">
+            {{ i18n.t("Titlebar.menu.turnto.theme") }}
+            <Sun v-if="theme.theme === 'dark'" class="titlebar-op-icon" />
+            <Moon v-else class="titlebar-op-icon" />
+          </MenubarItem>
+          <MenubarItem @select="() => WindowUtils.windowsQuit()">
+            {{ i18n.t("Titlebar.menu.turnto.exit") }}
+          </MenubarItem>
+        </MenubarContent>
+      </MenubarMenu>
+
+      <MenubarMenu>
+        <MenubarTrigger class="h-full w-fit px-2 text-sm">
+          {{ i18n.t("Titlebar.menu.edit") }}
+        </MenubarTrigger>
+        <MenubarContent class="w-fit transition-all duration-100 ease-in-out">
+          <MenubarItem @select="editorActions.undo">
+            {{ i18n.t("Titlebar.menu.edit.undo") }}
+            <MenubarShortcut>Ctrl+Z</MenubarShortcut>
+          </MenubarItem>
+          <MenubarItem @select="editorActions.redo">
+            {{ i18n.t("Titlebar.menu.edit.redo") }}
+            <MenubarShortcut>Ctrl+Shift+Z</MenubarShortcut>
+          </MenubarItem>
+
+          <MenubarSeparator />
+
+          <MenubarItem @select="editorActions.cut">
+            {{ i18n.t("Titlebar.menu.edit.cut") }}
+            <MenubarShortcut>Ctrl+X</MenubarShortcut>
+          </MenubarItem>
+          <MenubarItem @select="editorActions.copy">
+            {{ i18n.t("Titlebar.menu.edit.copy") }}
+            <MenubarShortcut>Ctrl+C</MenubarShortcut>
+          </MenubarItem>
+          <MenubarItem @select="() => editorActions.paste()">
+            {{ i18n.t("Titlebar.menu.edit.paste") }}
+            <MenubarShortcut>Ctrl+V</MenubarShortcut>
+          </MenubarItem>
+
+          <MenubarSeparator />
+
+          <MenubarItem @select="editorActions.selectAll">
+            {{ i18n.t("Titlebar.menu.edit.selectAll") }}
+            <MenubarShortcut>Ctrl+A</MenubarShortcut>
+          </MenubarItem>
+          <MenubarItem @select="editorActions.find">
+            {{ i18n.t("Titlebar.menu.edit.find") }}
+            <MenubarShortcut>Ctrl+K</MenubarShortcut>
+          </MenubarItem>
+        </MenubarContent>
+      </MenubarMenu>
+
+      <MenubarMenu>
+        <MenubarTrigger class="h-full w-fit px-2 text-sm">
+          {{ i18n.t("Titlebar.menu.help") }}
+        </MenubarTrigger>
+        <MenubarContent class="w-fit transition-all duration-100 ease-in-out">
+          <MenubarItem @select="() => router.push('/framework')">
+            {{ i18n.t("Titlebar.menu.about.framework") }}
+          </MenubarItem>
+          <MenubarSeparator />
+          <MenubarItem @select="() => dialogs.openAbout()">
+            {{ i18n.t("Titlebar.menu.about") }}
+          </MenubarItem>
+        </MenubarContent>
+      </MenubarMenu>
+    </Menubar>
+
+    <TitlebarTitle data-tauri-drag-region />
+
+    <TitlebarOperations />
+  </div>
 </template>
-
-<style scoped lang="postcss">
-#app-title-bar {
-	@apply relative inline-flex items-center justify-end w-full h-8
-	border-b border-slate-300 dark:border-slate-600
-	bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-200
-	transition-all
-  select-none;
-
-	z-index: 99999999;
-}
-
-.title {
-	@apply absolute inline-flex items-center top-1/2 left-2
-	text-sm font-black
-	-translate-y-1/2;
-}
-
-.buttons {
-	@apply inline-flex flex-row items-center justify-end w-full h-full;
-}
-
-.btn {
-	@apply inline-flex items-center justify-center w-12 h-full py-2 px-3
-	cursor-pointer rounded-none
-	text-slate-600 dark:text-slate-100 
-	transition ease-in-out duration-300;
-}
-.moving {
-	@apply bg-slate-600 text-slate-100;
-}
-.moving.danger {
-	@apply bg-red-400;
-}
-
-.darkmode {
-	@apply w-10 py-1.5 px-3;
-}
-
-.pin {
-	@apply w-10 p-0;
-}
-.pin .icon {
-	@apply w-5 p-1 transition-all
-	rounded scale-125;
-}
-.pin.moving .icon {
-	@apply rotate-[135deg];
-}
-
-.pin.pinned .icon {
-	@apply bg-slate-600 text-slate-100 rotate-[135deg] scale-100;
-}
-</style>

@@ -9,10 +9,22 @@ const routes: Array<RouteRecordRaw> = [
 		component: () => import("./views/Home.vue"),
 	},
 	{
-		path: "/about",
-		name: "About",
+		path: "/software",
+		name: "Software",
 		meta: {},
-		component: () => import("./views/About.vue"),
+		component: () => import("./views/Software.vue"),
+	},
+	{
+		path: "/framework",
+		name: "Framework",
+		meta: {},
+		component: () => import("./views/Framework.vue"),
+	},
+	{
+		path: "/tray",
+		name: "TrayMenu",
+		meta: { tray: true },
+		component: () => import("./views/TrayMenu.vue"),
 	},
 ]
 
