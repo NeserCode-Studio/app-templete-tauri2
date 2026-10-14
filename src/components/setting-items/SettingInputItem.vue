@@ -12,9 +12,9 @@ const props = defineProps<{
   description?: string
 }>()
 
-const emit = defineEmits<{ (e: "submit", data: FormData): void }>()
+const emit = defineEmits<{ (e: "itemSubmit", data: FormData): void }>()
 
-/* 受控值：父级 value 变化时同步，提交后也能立即反映新值 */
+/* 受控值：父级 value 变化时同步，提交后也能立即反映新�?*/
 const inner = defineModel<string>()
 
 watch(
@@ -30,7 +30,7 @@ function onSubmit(e: Event) {
   const data = new FormData(e.target as HTMLFormElement)
   /* 统一取受控值，避免 FormData 时序问题 */
   data.set("input", inner.value ?? "")
-  emit("submit", data)
+  emit("itemSubmit", data)
 }
 </script>
 

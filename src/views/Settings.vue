@@ -137,10 +137,7 @@ const langItems = [
   { value: "zh-CN", label: "简体中文" },
 ]
 const langSelection = ref(i18n.lang)
-/* 当前语言变化时同步下拉（如经 @super 切换） */
-watch(langSelection, (v) => {
-  if (v && v !== i18n.lang) i18n.setLanguage(v as never)
-})
+/* 当前语言经其他入口（@super）变化时同步下拉 */
 watch(
   () => i18n.lang,
   (v) => {
@@ -284,7 +281,7 @@ function autoCompleteAction(checked: boolean) {
 						:placeholder="i18n.t('Settings.items.title.placeholder')"
 						:title="i18n.t('Settings.items.title.title')"
 						:description="i18n.t('Settings.items.title.description')"
-						:on-item-submit="titleAction"
+						@item-submit="titleAction"
 					/>
 					<SettingSelectItem
 						v-model="langSelection"
@@ -293,7 +290,7 @@ function autoCompleteAction(checked: boolean) {
 						:placeholder="i18n.t('Settings.items.select.default.placeholder')"
 						:title="i18n.t('Settings.items.lang.title')"
 						:description="i18n.t('Settings.items.lang.description')"
-						:on-item-submit="langAction"
+						@item-submit="langAction"
 					/>
 					<SettingOptionalItem
 						:label="i18n.t('Settings.items.auto-complete.label')"
@@ -301,7 +298,7 @@ function autoCompleteAction(checked: boolean) {
 						id="optional.auto-complete"
 						:title="i18n.t('Settings.items.auto-complete.title')"
 						:description="i18n.t('Settings.items.auto-complete.description')"
-						:on-item-change="autoCompleteAction"
+						@item-change="autoCompleteAction"
 					/>
 				</div>
 			</TabsContent>

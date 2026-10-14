@@ -20,7 +20,7 @@ const props = defineProps<{
   description?: string
 }>()
 
-const emit = defineEmits<{ (e: "submit", data: FormData): void }>()
+const emit = defineEmits<{ (e: "itemSubmit", data: FormData): void }>()
 
 const selected = defineModel<string>()
 
@@ -29,7 +29,7 @@ function onSubmit(e: Event) {
   const data = new FormData(e.target as HTMLFormElement)
   /* reka-ui Select 不走原生 form，把当前选中值注入 FormData */
   data.set("select", selected.value ?? "")
-  emit("submit", data)
+  emit("itemSubmit", data)
 }
 </script>
 

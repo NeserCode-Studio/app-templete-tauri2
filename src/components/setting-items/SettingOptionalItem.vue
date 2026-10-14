@@ -10,13 +10,13 @@ const props = defineProps<{
   description?: string
 }>()
 
-const emit = defineEmits<{ (e: "change", value: boolean): void }>()
+const emit = defineEmits<{ (e: "itemChange", value: boolean): void }>()
 
 const model = defineModel<boolean>({ default: false })
 
 function onChange(v: boolean) {
   model.value = v
-  emit("change", v)
+  emit("itemChange", v)
 }
 </script>
 
