@@ -49,6 +49,15 @@ export const useThemeStore = defineStore("app-theme", () => {
     theme.value = dark ? "dark" : "light";
   });
 
+  // 跨窗口同步：其他窗口（主/托盘）修改 localStorage 时同步本窗口
+  // （Tauri 多窗口各自独立 WebView 实例，storage 事件在多窗口间触发）
+  window.addEventListener("storage", (e) => {
+    if (e.key === THEME_KEY && (e.newValue === "dark" || e.newValue === "light")) {
+      log.info("theme synced from other window", e.newValue);
+      theme.value = e.newValue;
+    }
+  });
+
   function setThemeMode(next: ThemeType): void {
     log.info("setTheme", next, "(user choice, stops following system)");
     manual.value = true;

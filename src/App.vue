@@ -135,7 +135,7 @@ watch(
 	height: 100vh;
 	width: 100vw;
 	overflow: hidden;
-	background-color: var(--background);
-	transition: background-color 100ms ease-in-out;
+	/* 背景由 TrayMenu 组件自绘（主题色跟随 store），容器保持透明 */
+	background: transparent;
 }
 </style>

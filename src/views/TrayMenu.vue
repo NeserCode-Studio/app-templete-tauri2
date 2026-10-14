@@ -61,7 +61,7 @@ async function handleAction(action: MenuAction) {
 <template>
 	<div
 		ref="menuRef"
-		class="w-full select-none"
+		class="h-screen w-screen select-none"
 		:class="theme.theme === 'dark' ? 'bg-[#1e1e1e] text-[#cccccc]' : 'bg-white text-[#333333]'"
 		style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
 	>

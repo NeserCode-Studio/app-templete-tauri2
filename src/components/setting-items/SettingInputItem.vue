@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { watch } from "vue"
 
 const props = defineProps<{
   type: "text" | "email" | "password" | "number"
@@ -13,9 +14,23 @@ const props = defineProps<{
 
 const emit = defineEmits<{ (e: "submit", data: FormData): void }>()
 
+/* 受控值：父级 value 变化时同步，提交后也能立即反映新值 */
+const inner = defineModel<string>()
+
+watch(
+  () => props.value,
+  (v) => {
+    inner.value = v
+  },
+  { immediate: true }
+)
+
 function onSubmit(e: Event) {
   e.preventDefault()
-  emit("submit", new FormData(e.target as HTMLFormElement))
+  const data = new FormData(e.target as HTMLFormElement)
+  /* 统一取受控值，避免 FormData 时序问题 */
+  data.set("input", inner.value ?? "")
+  emit("submit", data)
 }
 </script>
 
@@ -30,9 +45,9 @@ function onSubmit(e: Event) {
 			</div>
 			<div class="flex shrink-0 items-center gap-2 sm:w-[22rem] sm:justify-end">
 				<Input
+					v-model="inner"
 					:type="props.type"
 					:placeholder="props.placeholder"
-					:default-value="props.value"
 					name="input"
 					class="flex-1"
 				/>

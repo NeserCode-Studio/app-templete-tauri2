@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue"
+import { ref, computed, watch } from "vue"
 import { useLocalStorage } from "@vueuse/core"
 import { useI18nStore, useTitleStore } from "@/store"
 import { useToast } from "@/composables/useToast"
@@ -137,6 +137,16 @@ const langItems = [
   { value: "zh-CN", label: "简体中文" },
 ]
 const langSelection = ref(i18n.lang)
+/* 当前语言变化时同步下拉（如经 @super 切换） */
+watch(langSelection, (v) => {
+  if (v && v !== i18n.lang) i18n.setLanguage(v as never)
+})
+watch(
+  () => i18n.lang,
+  (v) => {
+    langSelection.value = v
+  }
+)
 
 function langAction(data: FormData) {
   const value = data.get("select")
