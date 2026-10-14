@@ -76,11 +76,21 @@
   * {
     @apply border-border outline-ring/50;
   }
-  /* 颜色过渡只在根容器层（对齐 rt：App.css 无 * 通配过渡，
-     * 通配会让 color-mix 元素在切换帧内同时重算导致闪烁） */
+  /* 颜色过渡只作用于背景（对齐 rt 观感：背景平滑、前景瞬时）。
+     显式禁用其他属性过渡：Tailwind 4 OKLCH 变量在 color 过渡的
+     中间帧会解析出异常值，表现为黑白来回闪烁。 */
   html,
   body {
-    @apply bg-background text-foreground transition-colors duration-100 ease-in-out;
+    @apply bg-background text-foreground;
+    transition-property: background-color;
+    transition-duration: 100ms;
+    transition-timing-function: ease-in-out;
+  }
+  .app-body,
+  .app-shell {
+    transition-property: background-color;
+    transition-duration: 100ms;
+    transition-timing-function: ease-in-out;
   }
   button {
     @apply cursor-pointer;
@@ -121,7 +131,7 @@
   .app-body { @apply fixed bottom-0 flex h-[calc(100vh-2rem)] w-screen flex-col items-center justify-center bg-neutral-50 select-none transition-colors duration-100 ease-in-out dark:bg-neutral-700; }
 
   /* ===== 视图容器 ===== */
-  .view { @apply relative z-0 h-full w-full transition-colors duration-100 ease-in-out; }
+  .view { @apply relative z-0 h-full w-full; }
   .view-home { @apply flex h-full min-h-screen w-full flex-col items-center justify-center; }
   .view-title { @apply h-full w-fit text-2xl font-semibold; }
   .view-settings { @apply flex h-auto w-full flex-col gap-6; }
@@ -132,7 +142,7 @@
      标题栏里的 Separator 是 shadcn 组件，其样式在调用处平铺。
   */
   .titlebar-op { @apply inline-flex h-full w-fit cursor-pointer items-center justify-center px-2.5 py-0.5 transition-colors delay-0 duration-100 ease-in-out hover:bg-neutral-200 dark:hover:bg-neutral-600 last:hover:bg-red-400 dark:last:hover:bg-red-600; }
-  .titlebar-op-icon { @apply h-4 w-4 transition-all duration-100 ease-in-out; }
+  .titlebar-op-icon { @apply h-4 w-4; }
   .titlebar-op.is-pinned .titlebar-op-icon { @apply rotate-135 fill-green-500; }
 }
 
@@ -141,4 +151,20 @@ html {
 }
 html.dark {
   color-scheme: dark;
+}
+
+/* 兜底：禁用所有非背景颜色过渡，防止 OKLCH 变量中间帧闪烁。
+   放在 layers 之外，优先级最高；背景过渡由 base 层的白名单规则提供。 */
+*,
+::before,
+::after {
+  transition-property: none !important;
+}
+html,
+body,
+.app-body,
+.app-shell {
+  transition-property: background-color !important;
+  transition-duration: 100ms !important;
+  transition-timing-function: ease-in-out !important;
 }
