@@ -17,6 +17,7 @@
 		"@lucide/vue": "^1.57.0",
 		"@tauri-apps/api": ">=2.0.0-rc.0",
 		"@tauri-apps/plugin-http": "^2.0.0-rc.2",
+		"@tauri-apps/plugin-opener": "^2.7.1",
 		"@tauri-apps/plugin-shell": ">=2.0.0-rc.0",
 		"@vueuse/core": "^11.0.3",
 		"class-variance-authority": "^0.7.1",

@@ -2,47 +2,108 @@
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog"
-import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/ui/button"
 import { useI18nStore, useDialogStore } from "@/store"
-import { getVersion } from "@tauri-apps/api/app"
-import { ref, onMounted } from "vue"
+import { openUrl } from "@tauri-apps/plugin-opener"
+import { ExternalLink, Info } from "@lucide/vue"
+import { ref, computed, watch } from "vue"
+import { getIdentifier, getName, getTauriVersion, getVersion } from "@tauri-apps/api/app"
+import { useRouter } from "vue-router"
+
+interface AboutMeta {
+  name: string
+  version: string
+  tauriVersion: string
+  identifier: string
+}
 
 const i18n = useI18nStore()
 const dialogs = useDialogStore()
-const version = ref("")
+const router = useRouter()
+const meta = ref<AboutMeta | null>(null)
 
-onMounted(async () => {
-  version.value = await getVersion().catch(() => "unknown")
-})
+/* 弹窗打开时拉取应用元信息；失败时降级为「未知」而非报错 */
+watch(
+  () => dialogs.aboutOpen,
+  async (open) => {
+    if (!open || meta.value) return
+    const [name, version, tauriVersion, identifier] = await Promise.all([
+      getName().catch(() => "—"),
+      getVersion().catch(() => "—"),
+      getTauriVersion().catch(() => "—"),
+      getIdentifier().catch(() => "—"),
+    ])
+    meta.value = { name, version, tauriVersion, identifier }
+  }
+)
+
+const appName = computed(() => meta.value?.name ?? "Tauri App")
+const title = computed(() =>
+  i18n.t("About.title", { name: appName.value })
+)
+
+const rows = computed(() => [
+  { label: i18n.t("About.version"), value: meta.value?.version ?? "—" },
+  { label: i18n.t("About.frontend"), value: meta.value?.tauriVersion ?? "—" },
+  { label: i18n.t("About.identifier"), value: meta.value?.identifier ?? "—" },
+])
+
+async function openWebsite() {
+  await openUrl("https://tauri.app/").catch(() => {})
+}
+
+function goFramework() {
+  dialogs.closeAbout()
+  void router.push("/framework")
+}
 </script>
 
 <template>
 	<Dialog :open="dialogs.aboutOpen" @update:open="(v: boolean) => v ? dialogs.openAbout() : dialogs.closeAbout()">
-		<DialogContent class="max-w-sm">
-			<DialogHeader>
-				<DialogTitle>{{ i18n.t("About.title", { name: "Tauri App" }) }}</DialogTitle>
-				<DialogDescription>{{ i18n.t("About.tagline") }}</DialogDescription>
-			</DialogHeader>
-			<Separator />
-			<div class="stack-3 text-sm">
-				<div class="row-label justify-between">
-					<span>{{ i18n.t("About.version") }}</span>
-					<span class="font-mono">{{ version }}</span>
-				</div>
-				<div class="row-label justify-between">
-					<span>{{ i18n.t("About.frontend") }}</span>
-					<span>Vue 3 + TypeScript</span>
-				</div>
-				<div class="row-label justify-between">
-					<span>{{ i18n.t("About.identifier") }}</span>
-					<span class="font-mono">com.tauri-app.app</span>
-				</div>
+		<DialogContent class="sm:max-w-md">
+			<div class="flex flex-col items-center gap-1 pt-2 text-center">
+				<DialogTitle class="text-lg">{{ title }}</DialogTitle>
+				<p class="text-muted-foreground text-xs">
+					{{ i18n.t("About.tagline") }}
+				</p>
 			</div>
-			<p class="text-muted-xs text-center">{{ i18n.t("About.copyright") }}</p>
+
+			<dl class="divide-border mt-2 divide-y overflow-hidden rounded-lg border border-border/60">
+				<div
+					v-for="row in rows"
+					:key="row.label"
+					class="bg-muted/30 flex items-baseline gap-4 px-3 py-2"
+				>
+					<dt class="text-muted-foreground w-24 shrink-0 text-xs">
+						{{ row.label }}
+					</dt>
+					<dd class="min-w-0 flex-1 truncate font-mono text-xs">
+						{{ row.value }}
+					</dd>
+				</div>
+			</dl>
+
+			<p class="text-muted-foreground text-center text-xs">
+				{{ i18n.t("About.copyright") }}
+			</p>
+
+			<div class="flex items-center justify-between gap-2">
+				<Button
+					variant="ghost"
+					size="sm"
+					class="text-muted-foreground"
+					@click="goFramework"
+				>
+					<Info class="icon-md" />
+					{{ i18n.t("Titlebar.menu.about.framework") }}
+				</Button>
+				<Button variant="outline" size="sm" @click="openWebsite">
+					{{ i18n.t("About.website") }}
+					<ExternalLink class="icon-md" />
+				</Button>
+			</div>
 		</DialogContent>
 	</Dialog>
 </template>
