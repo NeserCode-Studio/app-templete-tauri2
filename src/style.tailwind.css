@@ -163,7 +163,8 @@ html.dark {
 html,
 body,
 .app-body,
-.app-shell {
+.app-shell,
+.titlebar {
   transition-property: background-color !important;
   transition-duration: 100ms !important;
   transition-timing-function: ease-in-out !important;
