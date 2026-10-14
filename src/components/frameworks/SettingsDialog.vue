@@ -17,7 +17,7 @@ const dialogs = useDialogStore()
 	<Dialog :open="dialogs.settingsOpen" @update:open="(v: boolean) => v ? dialogs.openSettings() : dialogs.closeSettings()">
 		<DialogContent class="max-h-[80vh] overflow-y-auto">
 			<DialogHeader>
-				<DialogTitle>{{ i18n.t("Settings.general.description") }}</DialogTitle>
+				<DialogTitle>Settings</DialogTitle>
 				<DialogDescription>{{ i18n.t("Settings.general.description") }}</DialogDescription>
 			</DialogHeader>
 			<SettingItems />
