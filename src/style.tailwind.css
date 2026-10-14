@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -75,8 +76,9 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html,
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-100 ease-in-out;
   }
   button {
     @apply cursor-pointer;

@@ -125,7 +125,7 @@ watch(
 	<div v-if="isTrayWindow" class="app-tray">
 		<router-view />
 	</div>
-	<main v-else id="app-main" class="app-shell">
+	<main v-else id="app-main" class="app-shell transition-colors duration-100 ease-in-out">
 		<Titlebar />
 		<CommandDialog />
 
@@ -141,6 +141,6 @@ watch(
 
 <style lang="postcss" scoped>
 .app-tray {
-	@apply h-screen w-screen overflow-hidden bg-neutral-50 dark:bg-neutral-800;
+	@apply h-screen w-screen overflow-hidden bg-neutral-50 dark:bg-neutral-800 transition-colors duration-100 ease-in-out;
 }
 </style>
