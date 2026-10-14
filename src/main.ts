@@ -7,9 +7,7 @@ import router from "./router"
 import { createPinia } from "pinia"
 const pinia = createPinia()
 
-/* Style.Tailwind Import */
+/* Style: Tailwind 4 CSS-first (tokens + base + components) */
 import "./style.tailwind.css"
-/* Style Constants Import */
-import "./style.constants.css"
 
 createApp(App).use(router).use(pinia).mount("#app")

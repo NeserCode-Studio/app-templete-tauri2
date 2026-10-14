@@ -1,3 +1,140 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  button {
+    @apply cursor-pointer;
+  }
+}
+
+/**
+ * 可复用组件类
+ *
+ * 收录标准：同一组合在业务代码中出现 >= 3 次。
+ *
+ * 约束：本层不得用于覆盖 `components/ui/` 下 shadcn 组件的默认样式。
+ * `@layer components` 优先级低于 Tailwind 工具类，压不住 shadcn 组件；
+ * 这类覆盖必须平铺写进元素的 className（依赖 twMerge 合并）。
+ */
+@layer components {
+  /* ===== 布局：纵向堆叠 ===== */
+  .stack-1 { @apply flex flex-col gap-1; }
+  .stack-2 { @apply flex flex-col gap-2; }
+  .stack-3 { @apply flex flex-col gap-3; }
+  .stack-5 { @apply flex flex-col gap-5; }
+
+  /* ===== 布局：横向 ===== */
+  .row-icon { @apply flex flex-row items-center gap-1; }
+  .row-label { @apply flex items-center gap-1.5 text-xs font-medium text-muted-foreground; }
+
+  /* ===== 文本 ===== */
+  .text-muted-sm { @apply text-sm text-muted-foreground; }
+  .text-muted-xs { @apply text-xs text-muted-foreground; }
+
+  /* ===== 图标 ===== */
+  .icon-md { @apply h-4 w-4; }
+  .icon-sm { @apply h-3.5 w-3.5; }
+  .icon-action { @apply h-3.5 w-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-accent-foreground; }
+
+  /* ===== 应用骨架 ===== */
+  .app-shell { @apply flex h-screen w-screen flex-row items-center justify-center; }
+  .app-body { @apply fixed bottom-0 flex h-[calc(100vh-2rem)] w-screen flex-col items-center justify-center bg-neutral-50 select-none transition-colors duration-100 ease-in-out dark:bg-neutral-700; }
+
+  /* ===== 视图容器 ===== */
+  .view { @apply relative z-0 h-full w-full transition-colors duration-100 ease-in-out; }
+  .view-home { @apply flex h-full min-h-screen w-full flex-col items-center justify-center; }
+  .view-title { @apply h-full w-fit text-2xl font-semibold; }
+  .view-settings { @apply flex h-auto w-full flex-col gap-6; }
+  .view-framework { @apply mx-auto w-full max-w-4xl px-6 pt-6 pb-8; }
+
+  /* ===== 标题栏操作按钮 =====
+     作用在自有 <span> 上，非 shadcn 组件，故可收纳于此。
+     标题栏里的 Separator 是 shadcn 组件，其样式在调用处平铺。
+  */
+  .titlebar-op { @apply inline-flex h-full w-fit cursor-pointer items-center justify-center px-2.5 py-0.5 transition-colors delay-0 duration-100 ease-in-out hover:bg-neutral-200 dark:hover:bg-neutral-600 last:hover:bg-red-400 dark:last:hover:bg-red-600; }
+  .titlebar-op-icon { @apply h-4 w-4 transition-all duration-100 ease-in-out; }
+  .titlebar-op.is-pinned .titlebar-op-icon { @apply rotate-135 fill-green-500; }
+}
+
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
