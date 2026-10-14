@@ -11,7 +11,6 @@ const forwarded = useForwardPropsEmits(props, emits)
 
 <template>
   <DialogRoot v-bind="forwarded">
-    <slot />
     <CommandDialogOverlayContent>
       <Command class="[&_[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-group]:p-0">
         <slot />
